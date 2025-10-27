@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={jetbrains.variable}>
-      <body>
+      <body className="min-h-svh">
         <Navbar />
         {children}
       </body>

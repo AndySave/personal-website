@@ -1,5 +1,5 @@
-"use client";
-import { ReactTyped } from "react-typed";
+
+import TypedText from "@/components/TypedText";
 
 const projects = [
   {
@@ -48,22 +48,20 @@ export default function Home() {
         className="h-screen w-full flex flex-col items-center justify-center"
       >
         <p className="text-(--text-muted) text-lg mb-2">Hi, I'm</p>
-        <h1 className="text-6xl font-bold text-(--text-strong)">Andreas Sæveraas</h1>
+        <h1 className="text-6xl font-bold text-(--text-strong)">
+          Andreas Sæveraas
+        </h1>
         <h2 className="text-3xl mt-2">
           And I'm a{" "}
-          <span className="text-(--accent)">
-            <ReactTyped
-              strings={[
-                "Backend Developer",
-                "C++ Engineer",
-                "AI Enthusiast",
-                "Systems Programmer",
-              ]}
-              typeSpeed={60}
-              backSpeed={80}
-              loop
-            />
-          </span>
+          <TypedText
+            className="text-(--accent)"
+            strings={[
+              "Backend Developer",
+              "C++ Engineer",
+              "AI Enthusiast",
+              "Systems Programmer",
+            ]}
+          ></TypedText>
         </h2>
         <p className="mt-6 text-xl max-w-lg text-(--text-muted)">
           I build high-performance software — from chess engines to neural
