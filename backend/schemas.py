@@ -20,7 +20,7 @@ class TrainConfig(BaseModel):
     dataset_name: str
     layers: list[Layer]
 
-class AdultIncodeInput(BaseModel):
+class AdultIncomeInput(BaseModel):
     age: int = Field(..., ge=18, le=100)
     workclass: Literal["Federal-gov", "State-gov", "Local-gov", "Never-worked", "Private", "Self-emp-inc", "Self-emp-not-inc", "Without-pay"]
     education: Literal["<HS", "HS-grad", "Some-college", "Bachelors", "Masters", "Doctorate"]

@@ -4,44 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from typing import Annotated
 import uuid
-import nano_nn as nn
 import numpy as np
 from sklearn.metrics import accuracy_score
-# from dataset import AdultIncomeDataset
 from datasets.adult_income_dataset import AdultIncomeDataset
 from loaders import PandasCsvLoader
-from schemas import Layer, LayerType, TrainConfig, AdultIncodeInput
-
-
-def add_layer(module: nn.Module, layer: Layer):
-    match layer.type:
-        case LayerType.dense:
-            module.add(nn.Dense(layer.in_features, layer.out_features))
-        case LayerType.dropout:
-            module.add(nn.Dropout(0.5))  # TODO: Change later to accept custom rate
-        case LayerType.relu:
-            module.add(nn.ReLU())
-        case LayerType.sigmoid:
-            module.add(nn.Sigmoid())
-        case LayerType.softmax:
-            module.add(nn.Softmax())
-
-
-def build_model(layers: list[Layer]):
-    class Model(nn.Module):
-        def __init__(self):
-            super(Model, self).__init__()
-
-            for layer in layers:
-                add_layer(self, layer)
-
-    model = Model()
-    model.set_learning_rate(0.01)
-    model.set_loss_fn(nn.BinaryCrossEntropy())
-    model.set_optimizer(nn.Adam())
-
-    return model
-
+from schemas import TrainConfig, AdultIncomeInput
+from nn.builder import build_model
 
 
 app = FastAPI()
@@ -55,10 +23,12 @@ app.add_middleware(
 )
 
 models = {}
-dataset = AdultIncomeDataset(csv_loader=PandasCsvLoader())
+datasets = {
+    "adult_income": AdultIncomeDataset(csv_loader=PandasCsvLoader())
+}
 
 
-@app.post("/api/nn-framework/train")
+@app.post("/api/nn-framework/train/")
 async def train_model(train_config: TrainConfig, response: Response):
     model_id = str(uuid.uuid4())
     response.set_cookie(
@@ -69,6 +39,7 @@ async def train_model(train_config: TrainConfig, response: Response):
     )
 
     model = build_model(train_config.layers)
+    dataset = datasets[train_config.dataset_name]
 
     epochs = 60
     for i in range(epochs):
@@ -88,12 +59,12 @@ async def train_model(train_config: TrainConfig, response: Response):
     return {"accuracy": accuracy}
 
 
-@app.post("/api/nn-framework/predict")
-async def predict(input: AdultIncodeInput, model_id: Annotated[str | None, Cookie()] = None):
+async def predict(dataset_name: str, input, model_id):
     if not model_id or model_id not in models:
         return {"status": "error", "message": "No model trained"}
 
     model = models[model_id]
+    dataset = datasets[dataset_name]
 
     X = dataset.transform_one(input)
 
@@ -108,3 +79,7 @@ async def predict(input: AdultIncodeInput, model_id: Annotated[str | None, Cooki
         "probability": prob
     }
 
+
+@app.post("/api/nn-framework/predict/adult_income")
+async def predict_adult(input: AdultIncomeInput, model_id: Annotated[str | None, Cookie()] = None):
+    return await predict("adult_income", input, model_id)
