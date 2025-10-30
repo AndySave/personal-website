@@ -12,7 +12,7 @@ const NETWORKS: Network[] = [
     id: 1,
     name: "Small network",
     layers: [
-      { type: "dense", inFeatures: 31, outFeatures: 4 },
+      { type: "dense", inFeatures: 30, outFeatures: 4 },
       { type: "relu" },
       { type: "dense", inFeatures: 4, outFeatures: 6 },
       { type: "relu" },
@@ -24,7 +24,7 @@ const NETWORKS: Network[] = [
     id: 2,
     name: "Medium network",
     layers: [
-      { type: "dense", inFeatures: 31, outFeatures: 8 },
+      { type: "dense", inFeatures: 30, outFeatures: 8 },
       { type: "relu" },
       { type: "dense", inFeatures: 8, outFeatures: 16 },
       { type: "relu" },
