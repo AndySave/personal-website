@@ -1,5 +1,7 @@
 
-from fastapi import FastAPI, Response, Cookie 
+from fastapi import FastAPI, Response, Cookie
+from fastapi.middleware.cors import CORSMiddleware
+
 from typing import Literal, Optional, Annotated
 import uuid
 import nano_nn as nn
@@ -37,6 +39,14 @@ def build_model(layers: list[Layer]):
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 models = {}
 dataset = AdultIncomeDataset()
