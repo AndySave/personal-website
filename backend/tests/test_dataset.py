@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pandas as pd
 import numpy as np
 from datasets.adult_income_dataset import AdultIncomeDataset
-from schemas import AdultIncodeInput
+from schemas import AdultIncomeInput
 
 
 def _tiny_df():
@@ -91,7 +91,7 @@ def test_transform_one_returns_correct_shape():
 
     dataset = AdultIncomeDataset(csv_loader=mock_loader)
 
-    inp = AdultIncodeInput(
+    inp = AdultIncomeInput(
         age=33,
         workclass="Private",
         education="Masters",
