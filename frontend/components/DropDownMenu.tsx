@@ -1,4 +1,6 @@
 
+"use client"
+
 import {
   Listbox,
   ListboxButton,
@@ -8,35 +10,45 @@ import {
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 
-type Layer = {
-  type: string;
-  inFeatures?: number;
-  outFeatures?: number;
+
+export interface Option {
+    id: string | number;
+    name: string;
 }
 
-export type Network = {
-  id: number;
-  name: string;
-  layers: Layer[];
+interface Props {
+    options: Option[];
+    value: Option;
+    onChange: (value: Option) => void;
+    label?: string;
+    disabled?: boolean;
+    className?: string;
 }
 
-type Props = {
-  options: Network[];
-  value: Network;
-  onChange: (next: Network) => void;
-};
 
-export default function NetworkDropDown({ options, value, onChange }: Props) {
+export default function DropDownMenu({
+  options,
+  value,
+  onChange,
+  label,
+  disabled = false,
+  className = "",
+}: Props) {
   return (
-    <div className="mx-auto w-52">
-      <Listbox value={value} onChange={onChange}>
+    <div className={clsx("mx-auto w-52", className)}>
+      {label && (
+        <p className="mb-1 text-sm font-medium text-gray-300">{label}</p>
+      )}
+
+      <Listbox value={value} onChange={onChange} disabled={disabled}>
         <ListboxButton
           className={clsx(
             "relative block w-full rounded-lg bg-white/5 py-1.5 pr-8 pl-3 text-left text-sm/6 text-white",
-            "focus:not-data-focus:outline-none data-focus:outline-2 data-focus:-outline-offset-2 data-focus:outline-white/25"
+            "focus:outline-none data-focus:outline-2 data-focus:-outline-offset-2 data-focus:outline-white/25",
+            disabled && "opacity-50 cursor-not-allowed"
           )}
         >
-          {value.name}
+          {value?.name ?? "Select..."}
           <ChevronDownIcon
             className="group pointer-events-none absolute top-2.5 right-2.5 size-4 fill-white/60"
             aria-hidden="true"

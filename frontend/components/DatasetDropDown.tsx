@@ -13,6 +13,10 @@ import { useState } from "react";
 export type Dataset = {
   id: number;
   name: string;
+  inputs: {
+    name: string;
+    options: string[];
+  }[];
 };
 
 interface Props {
