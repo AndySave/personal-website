@@ -1,10 +1,18 @@
 
+from enum import Enum
 from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
 
+class LayerType(str, Enum):
+    dense = "dense"
+    dropout = "dropout"
+    relu = "relu"
+    sigmoid = "sigmoid"
+    softmax = "softmax"
+
 class Layer(BaseModel):
-    type: Literal["dense", "dropout", "relu", "sigmoid", "softmax"]
+    type: LayerType
     in_features: Optional[int] = None
     out_features: Optional[int] = None
 
