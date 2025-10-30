@@ -55,6 +55,7 @@ class AdultIncomeDataset(Dataset):
                 "capital-loss",
                 "native-country",
                 "occupation",
+                "relationship",
             ],
             inplace=True
         )
@@ -66,6 +67,9 @@ class AdultIncomeDataset(Dataset):
                 df = pd.get_dummies(df, columns=[col], drop_first=True)
             else:
                 df = pd.get_dummies(df, columns=[col], drop_first=False)
+
+        print(df.head())
+        print(df.columns)
 
         target_col = "income_>50K"
 

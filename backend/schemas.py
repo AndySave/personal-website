@@ -17,7 +17,6 @@ class CustomInput(BaseModel):
     workclass: str
     education: str
     marital_status: str
-    relationship: str
     race: str
     sex: Literal["Male", "Female"]
     work_hours: int
