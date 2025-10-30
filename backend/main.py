@@ -2,11 +2,10 @@
 from fastapi import FastAPI, Response, Cookie
 from fastapi.middleware.cors import CORSMiddleware
 
-from typing import Literal, Optional, Annotated
+from typing import Annotated
 import uuid
 import nano_nn as nn
 import numpy as np
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from dataset import AdultIncomeDataset
 from schemas import Layer, TrainConfig, CustomInput

@@ -74,15 +74,12 @@ class AdultIncomeDataset(Dataset):
         target_col = "income_>50K"
 
         n_per_class = df[target_col].value_counts().min()
-        df_bal = (
+        df = (
             df.groupby(target_col, group_keys=False)
             .apply(lambda x: x.sample(n=n_per_class, random_state=42))
             .sample(frac=1, random_state=42)
             .reset_index(drop=True)
         )
-
-        df = df_bal
-
 
         X = df.drop("income_>50K", axis=1).values
         y = df["income_>50K"].values
