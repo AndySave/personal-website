@@ -1,7 +1,9 @@
 
 from .base_dataset import BaseDataset
-from schemas import CustomInput
+from loaders import BaseCsvLoader
+from schemas import AdultIncodeInput
 import pandas as pd
+import numpy as np
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 
@@ -24,7 +26,7 @@ EDUCATION_MAP = {
             'Some-college': 'Some-college',
             'Bachelors': 'Bachelors',
             'Masters': 'Masters',
-            'Prof-school': 'Prof-school',
+            'Prof-school': 'Doctorate',
             'Doctorate': 'Doctorate',
         }
 
@@ -39,10 +41,11 @@ DROP_COLUMNS = [
             ]
 
 class AdultIncomeDataset(BaseDataset):
-    def __init__(self) -> None:
+    def __init__(self, csv_loader: BaseCsvLoader) -> None:
+        self.csv_loader = csv_loader
         self.X, self.y, self.column_transformer, self.feature_columns = self._get_dataset()
 
-    def _get_dataset(self, csv_file="adult.csv"):
+    def _get_dataset(self, path="adult.csv"):
         column_transformer = ColumnTransformer(
             transformers=[
                 ("cat", OneHotEncoder(handle_unknown="ignore", drop="if_binary", sparse_output=False), CAT_COLS),
@@ -50,7 +53,7 @@ class AdultIncomeDataset(BaseDataset):
             ]
         )
 
-        df = pd.read_csv(csv_file, skipinitialspace=True)
+        df = self.csv_loader.load(path, skipinitialspace=True)
 
         df.drop(
             columns=DROP_COLUMNS,
@@ -65,21 +68,18 @@ class AdultIncomeDataset(BaseDataset):
 
         feature_columns = column_transformer.get_feature_names_out().tolist()
 
-        return X, y, column_transformer, feature_columns
+        return np.array(X), np.array(y), column_transformer, feature_columns
     
 
-    def transform_one(self, custom_input: CustomInput):
-        df = pd.DataFrame([custom_input.model_dump()])
-        df["education"] = df["education"].replace(EDUCATION_MAP)
-
+    def transform_one(self, input: AdultIncodeInput):
+        df = pd.DataFrame([input.model_dump()])
         X = self.column_transformer.transform(df)
-
-        return X
+        return np.array(X)
     
     def num_features(self) -> int:
         return len(self.feature_columns)
 
-    def num_classes(self) -> int:  # TODO: Maybe change?
+    def num_classes(self) -> int:
         return 1
     
     def metadata(self) -> dict:

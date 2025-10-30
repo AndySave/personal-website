@@ -1,13 +1,12 @@
 
 from abc import ABC, abstractmethod
-from schemas import CustomInput
 
 class BaseDataset(ABC):
     @abstractmethod
     def _get_dataset(self): ...
 
     @abstractmethod
-    def transform_one(self, custom_input: CustomInput): ...
+    def transform_one(self): ...
     
     @abstractmethod
     def num_features(self) -> int: ...

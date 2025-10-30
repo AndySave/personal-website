@@ -7,8 +7,24 @@ import uuid
 import nano_nn as nn
 import numpy as np
 from sklearn.metrics import accuracy_score
-from dataset import AdultIncomeDataset
-from schemas import Layer, TrainConfig, CustomInput
+# from dataset import AdultIncomeDataset
+from datasets.adult_income_dataset import AdultIncomeDataset
+from loaders import PandasCsvLoader
+from schemas import Layer, LayerType, TrainConfig, AdultIncodeInput
+
+
+def add_layer(module: nn.Module, layer: Layer):
+    match layer.type:
+        case LayerType.dense:
+            module.add(nn.Dense(layer.in_features, layer.out_features))
+        case LayerType.dropout:
+            module.add(nn.Dropout(0.5))  # TODO: Change later to accept custom rate
+        case LayerType.relu:
+            module.add(nn.ReLU())
+        case LayerType.sigmoid:
+            module.add(nn.Sigmoid())
+        case LayerType.softmax:
+            module.add(nn.Softmax())
 
 
 def build_model(layers: list[Layer]):
@@ -17,16 +33,7 @@ def build_model(layers: list[Layer]):
             super(Model, self).__init__()
 
             for layer in layers:
-                if layer.type == "dense":
-                    self.add(nn.Dense(layer.in_features, layer.out_features))
-                elif layer.type == "dropout":
-                    self.add(nn.Dropout(0.5))  # TODO: Change later to accept custom rate
-                elif layer.type == "relu":
-                    self.add(nn.ReLU())
-                elif layer.type == "sigmoid":
-                    self.add(nn.Sigmoid())
-                elif layer.type == "softmax":
-                    self.add(nn.Softmax())
+                add_layer(self, layer)
 
     model = Model()
     model.set_learning_rate(0.01)
@@ -41,14 +48,14 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://10.0.0.18:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
 )
 
 models = {}
-dataset = AdultIncomeDataset()
+dataset = AdultIncomeDataset(csv_loader=PandasCsvLoader())
 
 
 @app.post("/api/nn-framework/train")
@@ -63,9 +70,8 @@ async def train_model(train_config: TrainConfig, response: Response):
 
     model = build_model(train_config.layers)
 
-    epochs = 50
+    epochs = 60
     for i in range(epochs):
-        # Training phase: enable dropout, etc.
         model.train()
         output, loss = model.forward(dataset.X, dataset.y)
         model.backward()
@@ -83,13 +89,13 @@ async def train_model(train_config: TrainConfig, response: Response):
 
 
 @app.post("/api/nn-framework/predict")
-async def predict(custom_input: CustomInput, model_id: Annotated[str | None, Cookie()] = None):
+async def predict(input: AdultIncodeInput, model_id: Annotated[str | None, Cookie()] = None):
     if not model_id or model_id not in models:
         return {"status": "error", "message": "No model trained"}
 
     model = models[model_id]
 
-    X = dataset.transform_one(custom_input)
+    X = dataset.transform_one(input)
 
     model.eval()
 

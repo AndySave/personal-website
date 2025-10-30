@@ -20,11 +20,11 @@ class TrainConfig(BaseModel):
     dataset_name: str
     layers: list[Layer]
 
-class CustomInput(BaseModel):
+class AdultIncodeInput(BaseModel):
     age: int = Field(..., ge=18, le=100)
-    workclass: str
-    education: str
-    marital_status: str
-    race: str
+    workclass: Literal["Federal-gov", "State-gov", "Local-gov", "Never-worked", "Private", "Self-emp-inc", "Self-emp-not-inc", "Without-pay"]
+    education: Literal["<HS", "HS-grad", "Some-college", "Bachelors", "Masters", "Doctorate"]
+    marital_status: Literal["Never-married", "Married-civ-spouse", "Married-AF-spouse", "Married-spouse-absent", "Separated", "Divorced", "Widowed"]
+    race: Literal["White", "Black", "Asian-Pac-Islander", "Amer-Indian-Eskimo", "Other"]
     sex: Literal["Male", "Female"]
-    work_hours: int
+    work_hours: int = Field(..., ge=0, le=200)
