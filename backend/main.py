@@ -1,8 +1,7 @@
 
-from fastapi import FastAPI, Response, Cookie
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
-from typing import Annotated
 import uuid
 import numpy as np
 from sklearn.metrics import accuracy_score
@@ -31,37 +30,29 @@ datasets = {
 @app.post("/api/nn-framework/train/")
 async def train_model(train_config: TrainConfig, response: Response):
     model_id = str(uuid.uuid4())
-    response.set_cookie(
-        key="model_id",
-        value=model_id,
-        httponly=True,
-        secure=False
-    )
 
     model = build_model(train_config.layers)
     dataset = datasets[train_config.dataset_name]
 
-    epochs = 60
-    for i in range(epochs):
+    training_loss = []
+    training_accuracy = []
+    for i in range(train_config.epochs):
         model.train()
         output, loss = model.forward(dataset.X, dataset.y)
+        training_loss.append(loss)
+        training_accuracy.append(accuracy_score(dataset.y, (output.squeeze() > 0.5)))
         model.backward()
         
-        print(f'epoch: {i+1}/{epochs}, loss: {loss:.6f}')
+        print(f'epoch: {i+1}/{train_config.epochs}, loss: {loss:.6f}')
     
     models[model_id] = model
-    
-    model.eval()
-    output = np.asarray(model.forward(dataset.X))
 
-    accuracy = accuracy_score(dataset.y, (output.squeeze() > 0.5))
-
-    return {"accuracy": accuracy}
+    return {"model_id": model_id, "training_loss": training_loss, "training_accuracy": training_accuracy}
 
 
 async def predict(dataset_name: str, input, model_id):
-    if not model_id or model_id not in models:
-        return {"status": "error", "message": "No model trained"}
+    if model_id not in models:
+        return {"status": "error", "message": f"Could not find model with model id: {model_id}"}
 
     model = models[model_id]
     dataset = datasets[dataset_name]
@@ -81,7 +72,7 @@ async def predict(dataset_name: str, input, model_id):
 
 
 @app.post("/api/nn-framework/predict/adult_income")
-async def predict_adult(input: AdultIncomeInput, model_id: Annotated[str | None, Cookie()] = None):
+async def predict_adult(model_id: str, input: AdultIncomeInput):
     return await predict("adult_income", input, model_id)
 
 

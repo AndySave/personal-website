@@ -17,6 +17,7 @@ class Layer(BaseModel):
     out_features: Optional[int] = None
 
 class TrainConfig(BaseModel):
+    epochs: int
     dataset_name: str
     layers: list[Layer]
 
