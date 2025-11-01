@@ -28,3 +28,23 @@ class AdultIncomeInput(BaseModel):
     race: Literal["White", "Black", "Asian-Pac-Islander", "Amer-Indian-Eskimo", "Other"]
     sex: Literal["Male", "Female"]
     work_hours: int = Field(..., ge=0, le=200)
+
+
+class FeatureOption(BaseModel):
+    value: str
+    display_name: str
+
+class FeatureMetadata(BaseModel):
+    name: str
+    display_name: str
+    type: str
+    options: Optional[list[FeatureOption]] = None
+    min: Optional[int] = None
+    max: Optional[int] = None
+
+class DatasetMetadata(BaseModel):
+    name: str
+    display_name: str
+    description: str
+    features: list[FeatureMetadata]
+

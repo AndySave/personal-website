@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 from datasets.adult_income_dataset import AdultIncomeDataset
 from loaders import PandasCsvLoader
-from schemas import TrainConfig, AdultIncomeInput
+from schemas import TrainConfig, AdultIncomeInput, DatasetMetadata
 from nn.builder import build_model
 
 
@@ -83,3 +83,11 @@ async def predict(dataset_name: str, input, model_id):
 @app.post("/api/nn-framework/predict/adult_income")
 async def predict_adult(input: AdultIncomeInput, model_id: Annotated[str | None, Cookie()] = None):
     return await predict("adult_income", input, model_id)
+
+
+@app.get("/api/nn-framework/datasets-metadata", response_model=list[DatasetMetadata])
+async def datasets_metadata():
+    metadatas = []
+    for dataset in datasets:
+        metadatas.append(datasets[dataset].metadata())
+    return metadatas
