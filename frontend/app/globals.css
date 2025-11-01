@@ -33,4 +33,16 @@
   h1, h2 {
     color: var(--text-strong);
   }
+  
+  input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield; /* Firefox */
+  }
+
+  /* Remove spinner arrows in Chrome, Safari, Edge */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }
