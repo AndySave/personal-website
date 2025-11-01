@@ -1,15 +1,21 @@
 import { useState, useEffect } from "react";
 import { DatasetMetadata } from "@/types/nn-framework";
-import { Network } from "@/components/NetworkDropDown";
+import { Network } from "@/types/nn-framework";
 
 export default function useTraining(
   selectedDataset: DatasetMetadata | null,
   selectedNetwork: Network,
   userInputs: Record<string, string>
 ) {
+  const [epochs, setEpochs] = useState("50");
   const [isTraining, setIsTraining] = useState(false);
-  const [accuracy, setAccuracy] = useState<number | null>(null);
   const [predictionProb, setPredictionProb] = useState<number | null>(null);
+  const [trainingLoss, setTrainingLoss] = useState<number[] | null>(null);
+  const [trainingAccuracy, setTrainingAccuracy] = useState<number[] | null>(
+    null
+  );
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const handleTrain = async () => {
     if (!selectedDataset) {
@@ -17,27 +23,26 @@ export default function useTraining(
     }
 
     setIsTraining(true);
-    setAccuracy(null);
+    setTrainingLoss(null);
+    setTrainingAccuracy(null);
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/nn-framework/train",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            dataset_name: selectedDataset.name,
-            layers: selectedNetwork.layers.map((layer) => ({
-              type: layer.type,
-              in_features: layer.inFeatures,
-              out_features: layer.outFeatures,
-            })),
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/api/nn-framework/train`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          epochs: epochs,
+          dataset_name: selectedDataset.name,
+          layers: selectedNetwork.layers.map((layer) => ({
+            type: layer.type,
+            in_features: layer.inFeatures,
+            out_features: layer.outFeatures,
+          })),
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
@@ -45,7 +50,8 @@ export default function useTraining(
 
       const data = await response.json();
       console.log("Training result:", data);
-      setAccuracy(data.accuracy);
+      setTrainingLoss(data.training_loss);
+      setTrainingAccuracy(data.training_accuracy);
     } catch (error) {
       console.error("Training failed:", error);
     } finally {
@@ -57,7 +63,7 @@ export default function useTraining(
     console.log(userInputs);
     try {
       const response = await fetch(
-        "http://localhost:8000/api/nn-framework/predict/adult_income",
+        `${API_URL}/api/nn-framework/predict/adult_income`,
         {
           method: "POST",
           headers: {
@@ -81,9 +87,12 @@ export default function useTraining(
   };
 
   return {
+    epochs,
+    setEpochs,
     isTraining,
-    accuracy,
     predictionProb,
+    trainingLoss,
+    trainingAccuracy,
     handleTrain,
     handlePredict,
   };

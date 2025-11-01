@@ -18,10 +18,11 @@ export default function FeatureInputs({
       <div key={feature.name} className="flex flex-col items-center">
         <p className="text-white mb-1">{feature.display_name}</p>
         <Input
+          value={userInputs[feature.name]}
           type="number"
           min={feature.min}
           max={feature.max}
-          className="border"
+          className="rounded-md border border-slate-700 bg-slate-900/60 text-white hover:bg-blue-400/20 transition-all duration-200"
           onChange={(event) => {
             setUserInputs((prev) => ({
               ...prev,

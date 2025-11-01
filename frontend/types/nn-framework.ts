@@ -19,3 +19,15 @@ export interface DatasetMetadata {
   description: string;
   features: FeatureMetadata[];
 }
+
+export type Layer = {
+  type: string;
+  inFeatures?: number;
+  outFeatures?: number;
+}
+
+export type Network = {
+  id: number;
+  name: string;
+  layers: Layer[];
+}

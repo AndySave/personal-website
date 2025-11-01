@@ -1,5 +1,4 @@
-
-"use client"
+"use client";
 
 import {
   Listbox,
@@ -10,23 +9,22 @@ import {
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 
-
 export interface Option {
-    id: string | number;
-    value: string;
-    display_name: string;
+  id: string | number;
+  value: string;
+  display_name: string;
 }
 
 interface Props {
-    options: Option[];
-    value: Option;
-    onChange: (value: Option) => void;
-    label?: string;
-    disabled?: boolean;
-    className?: string;
+  options: Option[];
+  value: Option;
+  onChange: (value: Option) => void;
+  label?: string;
+  disabled?: boolean;
+  className?: string;
 }
 
-
+("rounded-md border border-slate-700 bg-slate-900/60 text-white hover:bg-blue-400/20 transition-all duration-200"); // TODO: remove
 export default function DropDownMenu({
   options,
   value,
@@ -44,7 +42,7 @@ export default function DropDownMenu({
       <Listbox value={value} onChange={onChange} disabled={disabled}>
         <ListboxButton
           className={clsx(
-            "relative block w-full rounded-lg bg-white/5 py-1.5 pr-8 pl-3 text-left text-sm/6 text-white",
+            "relative block w-full rounded-md border border-slate-700 bg-slate-900/60 text-white hover:bg-blue-400/20 transition-all duration-200 py-1.5 pr-8 pl-3 text-left text-sm/6",
             "focus:outline-none data-focus:outline-2 data-focus:-outline-offset-2 data-focus:outline-white/25",
             disabled && "opacity-50 cursor-not-allowed"
           )}
@@ -60,7 +58,7 @@ export default function DropDownMenu({
           anchor="bottom"
           transition
           className={clsx(
-            "w-(--button-width) rounded-xl border border-white/5 bg-white/5 p-1 [--anchor-gap:--spacing(1)] focus:outline-none",
+            "w-(--button-width) rounded-md border border-slate-700 bg-slate-900/60 text-white p-1 [--anchor-gap:--spacing(1)] focus:outline-none",
             "transition duration-100 ease-in data-leave:data-closed:opacity-0"
           )}
         >
@@ -68,7 +66,7 @@ export default function DropDownMenu({
             <ListboxOption
               key={opt.id}
               value={opt}
-              className="group flex cursor-default items-center gap-2 rounded-lg px-3 py-1.5 select-none data-focus:bg-white/10"
+              className="group flex cursor-default items-center gap-2 rounded-lg px-3 py-1.5 select-none data-focus:bg-blue-400/20"
             >
               <CheckIcon className="invisible size-4 fill-white group-data-selected:visible" />
               <div className="text-sm/6 text-white">{opt.display_name}</div>

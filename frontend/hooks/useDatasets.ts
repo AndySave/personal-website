@@ -5,7 +5,7 @@ const getDefaultInputs = (dataset: DatasetMetadata): Record<string, string> =>
   Object.fromEntries(
     dataset.features.map((feature) => [
       feature.name,
-      feature.options?.[0].value ?? "",
+      feature.options?.[0].value || String(feature.min),
     ])
   );
 
@@ -15,8 +15,10 @@ export default function useDatasets() {
     useState<DatasetMetadata | null>(null);
   const [datasets, setDatasets] = useState<DatasetMetadata[] | null>(null);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
   useEffect(() => {
-    fetch("http://localhost:8000/api/nn-framework/datasets-metadata")
+    fetch(`${API_URL}/api/nn-framework/datasets-metadata`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Server error ${res.status}`);
@@ -31,7 +33,8 @@ export default function useDatasets() {
       .catch((err) => console.error(err));
   }, []);
 
-  useEffect(() => {  // TODO: Temp for debug
+  useEffect(() => {
+    // TODO: Temp for debug
     if (datasets) {
       console.log("Datasets updated:", datasets);
     }
