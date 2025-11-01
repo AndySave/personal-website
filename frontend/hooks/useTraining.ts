@@ -8,6 +8,7 @@ export default function useTraining(
   userInputs: Record<string, string>
 ) {
   const [epochs, setEpochs] = useState("50");
+  const [modelId, setModelId] = useState<string | null>(null);
   const [isTraining, setIsTraining] = useState(false);
   const [predictionProb, setPredictionProb] = useState<number | null>(null);
   const [trainingLoss, setTrainingLoss] = useState<number[] | null>(null);
@@ -23,6 +24,7 @@ export default function useTraining(
     }
 
     setIsTraining(true);
+    setModelId(null);
     setTrainingLoss(null);
     setTrainingAccuracy(null);
 
@@ -50,6 +52,7 @@ export default function useTraining(
 
       const data = await response.json();
       console.log("Training result:", data);
+      setModelId(data.model_id);
       setTrainingLoss(data.training_loss);
       setTrainingAccuracy(data.training_accuracy);
     } catch (error) {
@@ -63,7 +66,7 @@ export default function useTraining(
     console.log(userInputs);
     try {
       const response = await fetch(
-        `${API_URL}/api/nn-framework/predict/adult_income`,
+        `${API_URL}/api/nn-framework/predict/adult_income?model_id=${modelId}`,
         {
           method: "POST",
           headers: {
