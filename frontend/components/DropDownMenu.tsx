@@ -13,7 +13,8 @@ import clsx from "clsx";
 
 export interface Option {
     id: string | number;
-    name: string;
+    value: string;
+    display_name: string;
 }
 
 interface Props {
@@ -48,7 +49,7 @@ export default function DropDownMenu({
             disabled && "opacity-50 cursor-not-allowed"
           )}
         >
-          {value?.name ?? "Select..."}
+          {value?.display_name ?? "Select..."}
           <ChevronDownIcon
             className="group pointer-events-none absolute top-2.5 right-2.5 size-4 fill-white/60"
             aria-hidden="true"
@@ -70,7 +71,7 @@ export default function DropDownMenu({
               className="group flex cursor-default items-center gap-2 rounded-lg px-3 py-1.5 select-none data-focus:bg-white/10"
             >
               <CheckIcon className="invisible size-4 fill-white group-data-selected:visible" />
-              <div className="text-sm/6 text-white">{opt.name}</div>
+              <div className="text-sm/6 text-white">{opt.display_name}</div>
             </ListboxOption>
           ))}
         </ListboxOptions>
