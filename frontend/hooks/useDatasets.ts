@@ -1,7 +1,9 @@
+"use client";
+
 import { DatasetMetadata } from "@/types/nn-framework";
 import { useState, useEffect } from "react";
 
-const getDefaultInputs = (dataset: DatasetMetadata): Record<string, string> =>
+export const getDefaultInputs = (dataset: DatasetMetadata): Record<string, string> =>
   Object.fromEntries(
     dataset.features.map((feature) => [
       feature.name,
@@ -36,7 +38,7 @@ export default function useDatasets() {
   useEffect(() => {
     // TODO: Temp for debug
     if (datasets) {
-      console.log("Datasets updated:", datasets);
+      console.log("Datasets fetched:", datasets);
     }
   }, [datasets]);
 

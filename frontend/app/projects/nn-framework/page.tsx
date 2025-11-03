@@ -1,58 +1,16 @@
-"use client";
+"use client"
 
-import { useState } from "react";
 import { Button, Input } from "@headlessui/react";
 import NeuralNetworkVisualizer from "@/components/NeuralNetworkVisualizer";
 import DropDownMenu from "@/components/DropDownMenu";
 import FeatureInputs from "@/components/FeatureInputs";
 import TrainingGraph from "@/components/TrainingGraph";
-import useDatasets from "@/hooks/useDatasets";
+import useNetworks from "@/hooks/useNetworks";
+import useDatasets, { getDefaultInputs } from "@/hooks/useDatasets";
 import useTraining from "@/hooks/useTraining";
-import { DatasetMetadata, Network } from "@/types/nn-framework";
-
-const NETWORKS: Network[] = [
-  {
-    id: 1,
-    name: "Small network",
-    layers: [
-      { type: "dense", inFeatures: 30, outFeatures: 4 },
-      { type: "relu" },
-      { type: "dense", inFeatures: 4, outFeatures: 6 },
-      { type: "relu" },
-      { type: "dense", inFeatures: 6, outFeatures: 1 },
-      { type: "sigmoid" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Medium network",
-    layers: [
-      { type: "dense", inFeatures: 30, outFeatures: 8 },
-      { type: "relu" },
-      { type: "dense", inFeatures: 8, outFeatures: 16 },
-      { type: "relu" },
-      { type: "dense", inFeatures: 16, outFeatures: 8 },
-      { type: "relu" },
-      { type: "dense", inFeatures: 8, outFeatures: 1 },
-      { type: "sigmoid" },
-    ],
-  },
-];
-
-const getLayerSizes = (network: Network, dataset: DatasetMetadata) => {
-  const layerSizes = [dataset.features.length];
-
-  for (const layer of network.layers) {
-    if (layer.outFeatures !== undefined) {
-      layerSizes.push(layer.outFeatures);
-    }
-  }
-
-  return layerSizes;
-};
 
 export default function NeuralNetworkPage() {
-  const [selectedNetwork, setSelectedNetwork] = useState<Network>(NETWORKS[0]);
+  const { networks, selectedNetwork, setSelectedNetwork } = useNetworks();
   const {
     datasets,
     selectedDataset,
@@ -64,14 +22,14 @@ export default function NeuralNetworkPage() {
     epochs,
     setEpochs,
     isTraining,
-    predictionProb,
+    predictionOutput,
     trainingLoss,
     trainingAccuracy,
     handleTrain,
     handlePredict,
   } = useTraining(selectedDataset, selectedNetwork, userInputs);
 
-  if (!datasets || !selectedDataset) {
+  if (!datasets || !selectedDataset || !networks || !selectedNetwork) {
     return <p>Loading...</p>;
   }
 
@@ -86,21 +44,22 @@ export default function NeuralNetworkPage() {
           <div className="flex flex-col items-center">
             <h2>Networks</h2>
             <DropDownMenu
-              options={NETWORKS.map((network, i) => ({
+              options={networks.map((network, i) => ({
                 id: i,
-                value: network.name,
-                display_name: network.name,
+                value: network.display_name,
+                display_name: network.display_name,
               }))}
               value={{
-                id: NETWORKS.findIndex(
-                  (network) => network.name === selectedNetwork.name
+                id: networks.findIndex(
+                  (network) =>
+                    network.display_name === selectedNetwork.display_name
                 ),
-                value: selectedNetwork.name,
-                display_name: selectedNetwork.name,
+                value: selectedNetwork.display_name,
+                display_name: selectedNetwork.display_name,
               }}
               onChange={(option) => {
-                const newNetwork = NETWORKS.find(
-                  (network) => network.name === option.display_name
+                const newNetwork = networks.find(
+                  (network) => network.display_name === option.display_name
                 );
                 if (newNetwork) {
                   setSelectedNetwork(newNetwork);
@@ -126,10 +85,11 @@ export default function NeuralNetworkPage() {
               }}
               onChange={(option) => {
                 const newDataset = datasets.find(
-                  (dataset) => dataset.name === option.display_name
+                  (dataset) => dataset.display_name === option.display_name
                 );
                 if (newDataset) {
                   setSelectedDataset(newDataset);
+                  setUserInputs(getDefaultInputs(newDataset));
                 }
               }}
             />
@@ -148,9 +108,7 @@ export default function NeuralNetworkPage() {
           </div>
         </div>
 
-        <NeuralNetworkVisualizer
-          layerSizes={getLayerSizes(selectedNetwork, selectedDataset)}
-        />
+        <NeuralNetworkVisualizer layerSizes={selectedNetwork.layer_sizes} />
 
         <Button
           onClick={handleTrain}
@@ -171,7 +129,7 @@ export default function NeuralNetworkPage() {
               data={trainingLoss}
             />
           )}
-          {trainingAccuracy && (
+          {selectedDataset.task_type !== "regression" && trainingAccuracy && (
             <TrainingGraph
               title="Training Accuracy"
               xAxixLabel="Epoch"
@@ -211,9 +169,9 @@ export default function NeuralNetworkPage() {
             Predict
           </Button>
 
-          {predictionProb && (
+          {predictionOutput && (
             <p className="text-pink-300 text-sm tracking-wide">
-              Prediction probability: {predictionProb.toFixed(3)}
+              Prediction output: {predictionOutput.toFixed(3)}
             </p>
           )}
         </div>

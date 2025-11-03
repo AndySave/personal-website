@@ -1,3 +1,5 @@
+"use client";
+
 import { LineChart } from "@mui/x-charts";
 import { axisClasses } from "@mui/x-charts/ChartsAxis";
 

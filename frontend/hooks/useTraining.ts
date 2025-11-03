@@ -1,16 +1,17 @@
-import { useState, useEffect } from "react";
-import { DatasetMetadata } from "@/types/nn-framework";
-import { Network } from "@/types/nn-framework";
+"use client";
+
+import { useState } from "react";
+import { DatasetMetadata, NetworkMetadata } from "@/types/nn-framework";
 
 export default function useTraining(
   selectedDataset: DatasetMetadata | null,
-  selectedNetwork: Network,
+  selectedNetwork: NetworkMetadata | null,
   userInputs: Record<string, string>
 ) {
   const [epochs, setEpochs] = useState("50");
   const [modelId, setModelId] = useState<string | null>(null);
   const [isTraining, setIsTraining] = useState(false);
-  const [predictionProb, setPredictionProb] = useState<number | null>(null);
+  const [predictionOutput, setPredictionOutput] = useState<number | null>(null);
   const [trainingLoss, setTrainingLoss] = useState<number[] | null>(null);
   const [trainingAccuracy, setTrainingAccuracy] = useState<number[] | null>(
     null
@@ -19,7 +20,7 @@ export default function useTraining(
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const handleTrain = async () => {
-    if (!selectedDataset) {
+    if (!selectedDataset || !selectedNetwork) {
       return;
     }
 
@@ -38,11 +39,7 @@ export default function useTraining(
         body: JSON.stringify({
           epochs: epochs,
           dataset_name: selectedDataset.name,
-          layers: selectedNetwork.layers.map((layer) => ({
-            type: layer.type,
-            in_features: layer.inFeatures,
-            out_features: layer.outFeatures,
-          })),
+          model_size: selectedNetwork.model_size,
         }),
       });
 
@@ -66,7 +63,7 @@ export default function useTraining(
     console.log(userInputs);
     try {
       const response = await fetch(
-        `${API_URL}/api/nn-framework/predict/adult_income?model_id=${modelId}`,
+        `${API_URL}/api/nn-framework/predict/${selectedDataset?.name}?model_id=${modelId}`,
         {
           method: "POST",
           headers: {
@@ -82,7 +79,7 @@ export default function useTraining(
       }
 
       const data = await response.json();
-      setPredictionProb(data.probability);
+      setPredictionOutput(data.output);
       console.log(data);
     } catch (error) {
       console.error("Prediction failed:", error);
@@ -93,7 +90,7 @@ export default function useTraining(
     epochs,
     setEpochs,
     isTraining,
-    predictionProb,
+    predictionOutput,
     trainingLoss,
     trainingAccuracy,
     handleTrain,
