@@ -1,5 +1,7 @@
 
 from abc import ABC, abstractmethod
+from typing import Literal
+from schemas import DatasetMetadata
 
 class BaseDataset(ABC):
     @abstractmethod
@@ -12,7 +14,10 @@ class BaseDataset(ABC):
     def num_features(self) -> int: ...
 
     @abstractmethod
-    def num_classes(self) -> int: ...
+    def num_outputs(self) -> int: ...
 
     @abstractmethod
-    def metadata(self) -> dict: ...
+    def task_type(self) -> Literal["regression", "binary_classification", "multi_classification"]: ...
+
+    @abstractmethod
+    def metadata(self) -> DatasetMetadata: ...
