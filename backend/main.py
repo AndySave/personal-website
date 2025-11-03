@@ -6,9 +6,10 @@ import uuid
 import numpy as np
 from sklearn.metrics import accuracy_score
 from datasets.adult_income_dataset import AdultIncomeDataset
+from datasets.medical_cost_dataset import MedicalCostDataset
 from loaders import PandasCsvLoader
-from schemas import TrainConfig, AdultIncomeInput, DatasetMetadata
-from nn.builder import build_model
+from schemas import TrainConfig, AdultIncomeInput, MedicalCostInput, DatasetMetadata
+from nn.builder import SmallModel, MediumModel
 
 
 app = FastAPI()
@@ -23,15 +24,25 @@ app.add_middleware(
 
 models = {}
 datasets = {
-    "adult_income": AdultIncomeDataset(csv_loader=PandasCsvLoader())
+    "adult_income": AdultIncomeDataset(csv_loader=PandasCsvLoader()),
+    "medical_cost": MedicalCostDataset(csv_loader=PandasCsvLoader()),
 }
 
 
 @app.post("/api/nn-framework/train/")
-async def train_model(train_config: TrainConfig, response: Response):
+async def train_model(train_config: TrainConfig):
     model_id = str(uuid.uuid4())
+    dataset = datasets[train_config.dataset_name]
+    task_type = dataset.task_type()
 
-    model = build_model(train_config.layers)
+    if train_config.model_size == "small":
+        model = SmallModel(dataset.num_features(),
+                           dataset.num_outputs(), task_type)
+    else:
+        # TODO: Add more models
+        model = MediumModel(dataset.num_features(),
+                            dataset.num_outputs(), task_type)
+
     dataset = datasets[train_config.dataset_name]
 
     training_loss = []
@@ -40,11 +51,13 @@ async def train_model(train_config: TrainConfig, response: Response):
         model.train()
         output, loss = model.forward(dataset.X, dataset.y)
         training_loss.append(loss)
-        training_accuracy.append(accuracy_score(dataset.y, (output.squeeze() > 0.5)))
+
+        if dataset.task_type() != "regression":
+            training_accuracy.append(accuracy_score(dataset.y, (output.squeeze() > 0.5)))
         model.backward()
-        
+
         print(f'epoch: {i+1}/{train_config.epochs}, loss: {loss:.6f}')
-    
+
     models[model_id] = model
 
     return {"model_id": model_id, "training_loss": training_loss, "training_accuracy": training_accuracy}
@@ -61,13 +74,10 @@ async def predict(dataset_name: str, input, model_id):
 
     model.eval()
 
-    output = np.asarray(model.forward(X))
-    prob = float(output.squeeze())
-    label = ">50K" if prob > 0.5 else "<=50K"
+    output = float(np.asarray(model.forward(X)).squeeze())
 
     return {
-        "prediction": label,
-        "probability": prob
+        "output": output,
     }
 
 
@@ -76,9 +86,26 @@ async def predict_adult(model_id: str, input: AdultIncomeInput):
     return await predict("adult_income", input, model_id)
 
 
+@app.post("/api/nn-framework/predict/medical_cost")
+async def predict_medical(model_id: str, input: MedicalCostInput):
+    return await predict("medical_cost", input, model_id)
+
+
 @app.get("/api/nn-framework/datasets-metadata", response_model=list[DatasetMetadata])
 async def datasets_metadata():
     metadatas = []
-    for dataset in datasets:
-        metadatas.append(datasets[dataset].metadata())
+    for dataset_name in datasets:
+        dataset = datasets[dataset_name]
+        metadatas.append(dataset.metadata())
     return metadatas
+
+
+@app.get("/api/nn-framework/networks-metadata")
+async def networks_metadata():
+    metadatas = [SmallModel.metadata(), MediumModel.metadata()]
+    return metadatas
+
+
+@app.get("/api/nn-framework/test")
+async def test():
+    return {"features": datasets["adult_income"].num_features()}

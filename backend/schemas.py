@@ -19,7 +19,7 @@ class Layer(BaseModel):
 class TrainConfig(BaseModel):
     epochs: int
     dataset_name: str
-    layers: list[Layer]
+    model_size: Literal["small", "medium", "large"]
 
 class AdultIncomeInput(BaseModel):
     age: int = Field(..., ge=18, le=100)
@@ -29,6 +29,14 @@ class AdultIncomeInput(BaseModel):
     race: Literal["White", "Black", "Asian-Pac-Islander", "Amer-Indian-Eskimo", "Other"]
     sex: Literal["Male", "Female"]
     work_hours: int = Field(..., ge=0, le=200)
+
+class MedicalCostInput(BaseModel):
+    age: int
+    sex: Literal["male", "female"]
+    bmi: float
+    children: int
+    smoker: Literal["yes", "no"]
+    region: Literal["northwest", "northeast", "southwest", "southeast"]
 
 
 class FeatureOption(BaseModel):
@@ -46,6 +54,12 @@ class FeatureMetadata(BaseModel):
 class DatasetMetadata(BaseModel):
     name: str
     display_name: str
+    task_type: Literal["regression", "binary_classification", "multi_classification"]
     description: str
     features: list[FeatureMetadata]
 
+
+class NetworkMetadata(BaseModel):
+    display_name: str
+    model_size: Literal["small", "medium", "large"]
+    layer_sizes: list[int]
