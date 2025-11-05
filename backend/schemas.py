@@ -51,10 +51,15 @@ class FeatureMetadata(BaseModel):
     min: Optional[int] = None
     max: Optional[int] = None
 
+class TaskType(str, Enum):
+    regression = "regression"
+    binary_classification = "binary_classification"
+    multi_classification = "multi_classification"
+
 class DatasetMetadata(BaseModel):
     name: str
     display_name: str
-    task_type: Literal["regression", "binary_classification", "multi_classification"]
+    task_type: TaskType
     description: str
     features: list[FeatureMetadata]
 
@@ -62,4 +67,3 @@ class DatasetMetadata(BaseModel):
 class NetworkMetadata(BaseModel):
     display_name: str
     model_size: Literal["small", "medium", "large"]
-    layer_sizes: list[int]

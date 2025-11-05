@@ -2,7 +2,7 @@
 from typing import Literal
 from .base_dataset import BaseDataset
 from loaders import BaseCsvLoader
-from schemas import MedicalCostInput, FeatureOption, FeatureMetadata, DatasetMetadata
+from schemas import MedicalCostInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType
 
 import numpy as np
 import pandas as pd
@@ -50,15 +50,15 @@ class MedicalCostDataset(BaseDataset):
     def num_outputs(self) -> int:
         return 1
     
-    def task_type(self) -> Literal["regression", "binary_classification", "multi_classification"]:
-        return "regression"
+    def task_type(self) -> TaskType:
+        return TaskType.regression
 
     def metadata(self) -> DatasetMetadata:
         return DatasetMetadata(
             name="medical_cost",
             display_name="Medical Cost",
-            task_type="regression",
-            description="Predicts the estimated annual medical cost (healthcare charges) for an individual based on demographic and lifestyle factors.",
+            task_type=TaskType.regression,
+            description="Predicts the estimated medical insurance charges billed to an individual based on demographic and lifestyle factors.",
             features=[
                 FeatureMetadata(
                     name="sex",
@@ -98,7 +98,7 @@ class MedicalCostDataset(BaseDataset):
                 ),
                 FeatureMetadata(
                     name="bmi",
-                    display_name="Body Mass Index (BMI)",
+                    display_name="Body Mass Index",
                     type="numeric",
                     min=10,
                     max=50,

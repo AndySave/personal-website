@@ -2,7 +2,7 @@
 from typing import Literal
 from .base_dataset import BaseDataset
 from loaders import BaseCsvLoader
-from schemas import AdultIncomeInput, FeatureOption, FeatureMetadata, DatasetMetadata
+from schemas import AdultIncomeInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
@@ -84,14 +84,14 @@ class AdultIncomeDataset(BaseDataset):
     def num_outputs(self) -> int:
         return 1
     
-    def task_type(self) -> Literal["regression", "binary_classification", "multi_classification"]:
-        return "binary_classification"
+    def task_type(self) -> TaskType:
+        return TaskType.binary_classification
 
     def metadata(self) -> DatasetMetadata:
         return DatasetMetadata(
             name="adult_income",
             display_name="Adult Income",
-            task_type="binary_classification",
+            task_type=TaskType.binary_classification,
             description="Predicts whether income exceeds $50K/yr based on census data.",
             features=[
                 FeatureMetadata(
