@@ -12,6 +12,7 @@ export default function useTraining(
   const [modelId, setModelId] = useState<string | null>(null);
   const [isTraining, setIsTraining] = useState(false);
   const [predictionOutput, setPredictionOutput] = useState<number | null>(null);
+  const [activations, setActivations] = useState<number[][] | null>(null);
   const [trainingLoss, setTrainingLoss] = useState<number[] | null>(null);
   const [trainingAccuracy, setTrainingAccuracy] = useState<number[] | null>(
     null
@@ -80,6 +81,7 @@ export default function useTraining(
 
       const data = await response.json();
       setPredictionOutput(data.output);
+      setActivations(data.activations);
       console.log(data);
     } catch (error) {
       console.error("Prediction failed:", error);
@@ -91,6 +93,7 @@ export default function useTraining(
     setEpochs,
     isTraining,
     predictionOutput,
+    activations,
     trainingLoss,
     trainingAccuracy,
     handleTrain,

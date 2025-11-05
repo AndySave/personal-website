@@ -35,5 +35,4 @@ export type Network = {
 export interface NetworkMetadata {
   display_name: string;
   model_size: "small" | "medium" | "large";
-  layer_sizes: number[];
 }
