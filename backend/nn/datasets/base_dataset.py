@@ -1,14 +1,19 @@
 
+from numpy import ndarray
 from abc import ABC, abstractmethod
-from typing import Literal
-from schemas import DatasetMetadata
+from typing import Any
+from pydantic import BaseModel
+from backend.schemas import DatasetMetadata, TaskType
 
 class BaseDataset(ABC):
+    X: Any
+    y: Any
+
     @abstractmethod
     def _get_dataset(self): ...
 
     @abstractmethod
-    def transform_one(self): ...
+    def transform_one(self, input: BaseModel) -> ndarray: ...
     
     @abstractmethod
     def num_features(self) -> int: ...
@@ -17,7 +22,7 @@ class BaseDataset(ABC):
     def num_outputs(self) -> int: ...
 
     @abstractmethod
-    def task_type(self) -> Literal["regression", "binary_classification", "multi_classification"]: ...
+    def task_type(self) -> TaskType: ...
 
     @abstractmethod
     def metadata(self) -> DatasetMetadata: ...

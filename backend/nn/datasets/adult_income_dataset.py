@@ -1,8 +1,8 @@
 
-from typing import Literal
+from . import DATASETS_DIR
 from .base_dataset import BaseDataset
-from loaders import BaseCsvLoader
-from schemas import AdultIncomeInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType
+from backend.loaders import BaseCsvLoader
+from backend.schemas import AdultIncomeInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
@@ -47,7 +47,7 @@ class AdultIncomeDataset(BaseDataset):
         self.csv_loader = csv_loader
         self.X, self.y, self.column_transformer, self.feature_columns = self._get_dataset()
 
-    def _get_dataset(self, path="datasets/adult.csv"):
+    def _get_dataset(self, path=f"{DATASETS_DIR}/adult.csv"):
         column_transformer = ColumnTransformer(
             transformers=[
                 ("cat", OneHotEncoder(handle_unknown="ignore",
@@ -73,7 +73,7 @@ class AdultIncomeDataset(BaseDataset):
 
         return np.array(X), np.array(y), column_transformer, feature_columns
 
-    def transform_one(self, input: AdultIncomeInput):
+    def transform_one(self, input: AdultIncomeInput) -> np.ndarray:
         df = pd.DataFrame([input.model_dump()])
         X = self.column_transformer.transform(df)
         return np.array(X)

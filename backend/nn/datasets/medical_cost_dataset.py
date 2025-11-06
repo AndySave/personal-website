@@ -1,8 +1,8 @@
 
-from typing import Literal
+from . import DATASETS_DIR
 from .base_dataset import BaseDataset
-from loaders import BaseCsvLoader
-from schemas import MedicalCostInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType
+from backend.loaders import BaseCsvLoader
+from backend.schemas import MedicalCostInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType
 
 import numpy as np
 import pandas as pd
@@ -20,7 +20,7 @@ class MedicalCostDataset(BaseDataset):
         self.csv_loader = csv_loader
         self.X, self.y, self.column_transformer, self.feature_columns = self._get_dataset()
 
-    def _get_dataset(self, path="datasets/insurance.csv"):
+    def _get_dataset(self, path=f"{DATASETS_DIR}/insurance.csv"):
         column_transformer = ColumnTransformer(
             transformers=[
                 ("cat", OneHotEncoder(handle_unknown="ignore",
@@ -39,7 +39,7 @@ class MedicalCostDataset(BaseDataset):
 
         return np.array(X), np.array(y), column_transformer, feature_columns
 
-    def transform_one(self, input: MedicalCostInput):
+    def transform_one(self, input: MedicalCostInput) -> np.ndarray:
         df = pd.DataFrame([input.model_dump()])
         X = self.column_transformer.transform(df)
         return np.array(X)
