@@ -2,8 +2,8 @@
 from unittest.mock import Mock
 import pandas as pd
 import numpy as np
-from datasets.adult_income_dataset import AdultIncomeDataset
-from schemas import AdultIncomeInput
+from backend.nn.datasets.adult_income_dataset import AdultIncomeDataset
+from backend.schemas import AdultIncomeInput
 
 
 def _tiny_df():

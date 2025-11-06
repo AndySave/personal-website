@@ -1,16 +1,20 @@
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 import uuid
 import numpy as np
 import nano_nn as nn
 from sklearn.metrics import accuracy_score
-from datasets.adult_income_dataset import AdultIncomeDataset
-from datasets.medical_cost_dataset import MedicalCostDataset
-from loaders import PandasCsvLoader
-from schemas import TrainConfig, AdultIncomeInput, MedicalCostInput, DatasetMetadata
-from nn.network import SmallModel, MediumModel, LargeModel
+from pydantic import BaseModel
+from .nn.datasets.base_dataset import BaseDataset
+from .nn.datasets.adult_income_dataset import AdultIncomeDataset
+from .nn.datasets.medical_cost_dataset import MedicalCostDataset
+from .loaders import PandasCsvLoader
+from .schemas import TrainConfig, AdultIncomeInput, MedicalCostInput, DatasetMetadata, NetworkMetadata, ModelSize
+from .nn.network import SmallModel, MediumModel, LargeModel
+from .nn.utils import get_activations
+
 
 
 app = FastAPI()
@@ -24,7 +28,7 @@ app.add_middleware(
 )
 
 models: dict[str, nn.Module] = {}
-datasets = {
+datasets: dict[str, BaseDataset] = {
     "adult_income": AdultIncomeDataset(csv_loader=PandasCsvLoader()),
     "medical_cost": MedicalCostDataset(csv_loader=PandasCsvLoader()),
 }
@@ -32,6 +36,9 @@ datasets = {
 
 @app.post("/api/nn-framework/train")
 async def train_model(train_config: TrainConfig):
+    if train_config.dataset_name not in datasets:
+        raise HTTPException(status_code=404, detail=f"Couldn't find dataset with name: {train_config.dataset_name}")
+
     model_id = str(uuid.uuid4())
     dataset = datasets[train_config.dataset_name]
     task_type = dataset.task_type()
@@ -42,11 +49,9 @@ async def train_model(train_config: TrainConfig):
     elif train_config.model_size == "medium":
         model = MediumModel(dataset.num_features(),
                             dataset.num_outputs(), task_type)
-    elif train_config.model_size == "large":
+    else:
         model = LargeModel(dataset.num_features(),
                            dataset.num_outputs(), task_type)
-    else:
-        return {"status": "error", "message": f"There is no model with size {train_config.model_size}"}
 
     dataset = datasets[train_config.dataset_name]
 
@@ -69,40 +74,12 @@ async def train_model(train_config: TrainConfig):
     return {"model_id": model_id, "training_loss": training_loss, "training_accuracy": training_accuracy if len(training_accuracy) > 0 else None}
 
 
-async def predict(dataset_name: str, input, model_id):
-    if model_id not in models:
-        return {"status": "error", "message": f"Could not find model with model id: {model_id}"}
-
-    model = models[model_id]
-    dataset = datasets[dataset_name]
-
+def predict(dataset: BaseDataset, model: nn.Module, input: BaseModel):
     X = dataset.transform_one(input)
 
     model.eval()
-
     output = float(np.asarray(model.forward(X)).squeeze())
-
-    layer_activations = []
-    temp = X[:]
-    for layer in model.layers:
-        temp = layer.forward(temp)
-
-        # We want the raw output from the last layer
-        if layer is model.layers[-1]:
-            layer_activations.append(temp[0])
-        # TODO: Improve the nn framework so I can use isinstance(layer, nn.Activation) instead
-        elif isinstance(layer, (nn.ReLU, nn.Sigmoid, nn.Softmax)):
-            min_val = np.min(temp)
-            max_val = np.max(temp)
-
-            if max_val > min_val:
-                activation_normalized = (temp - min_val) / (max_val - min_val)
-            else:
-                activation_normalized = np.zeros_like(temp)
-
-            layer_activations.append(activation_normalized[0])
-
-    layer_activations = [a.tolist() for a in layer_activations]
+    layer_activations = get_activations(model, X)
 
     return {
         "output": output,
@@ -112,12 +89,24 @@ async def predict(dataset_name: str, input, model_id):
 
 @app.post("/api/nn-framework/predict/adult_income")
 async def predict_adult(model_id: str, input: AdultIncomeInput):
-    return await predict("adult_income", input, model_id)
+    if model_id not in models:
+        raise HTTPException(status_code=404, detail=f"Could not find model with model id: {model_id}")
+
+    model = models[model_id]
+    dataset = datasets["adult_income"]
+
+    return predict(dataset, model, input)
 
 
 @app.post("/api/nn-framework/predict/medical_cost")
 async def predict_medical(model_id: str, input: MedicalCostInput):
-    return await predict("medical_cost", input, model_id)
+    if model_id not in models:
+        raise HTTPException(status_code=404, detail=f"Could not find model with model id: {model_id}")
+
+    model = models[model_id]
+    dataset = datasets["medical_cost"]
+
+    return predict(dataset, model, input)
 
 
 @app.get("/api/nn-framework/datasets-metadata", response_model=list[DatasetMetadata])
@@ -129,13 +118,8 @@ async def datasets_metadata():
     return metadatas
 
 
-@app.get("/api/nn-framework/networks-metadata")
+@app.get("/api/nn-framework/networks-metadata", response_model=list[NetworkMetadata])
 async def networks_metadata():
     metadatas = [SmallModel.metadata(), MediumModel.metadata(),
                  LargeModel.metadata()]
     return metadatas
-
-
-@app.get("/api/nn-framework/test")
-async def test():
-    return {"features": datasets["adult_income"].num_features()}

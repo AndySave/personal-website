@@ -1,6 +1,6 @@
 
 import nano_nn as nn
-from schemas import NetworkMetadata, TaskType
+from backend.schemas import NetworkMetadata, TaskType, ModelSize
 
 class SmallModel(nn.Module):
     def __init__(self, num_features: int, num_outputs: int, task_type: TaskType):
@@ -27,7 +27,7 @@ class SmallModel(nn.Module):
     
     @staticmethod
     def metadata() -> NetworkMetadata:
-        return NetworkMetadata(display_name="Small Network", model_size="small")
+        return NetworkMetadata(display_name="Small Network", model_size=ModelSize.small)
 
 
 class MediumModel(nn.Module):
@@ -57,7 +57,7 @@ class MediumModel(nn.Module):
     
     @staticmethod
     def metadata() -> NetworkMetadata:
-        return NetworkMetadata(display_name="Medium Network", model_size="medium")
+        return NetworkMetadata(display_name="Medium Network", model_size=ModelSize.medium)
 
 
 class LargeModel(nn.Module):
@@ -89,4 +89,4 @@ class LargeModel(nn.Module):
     
     @staticmethod
     def metadata() -> NetworkMetadata:
-        return NetworkMetadata(display_name="Large Network", model_size="large")
+        return NetworkMetadata(display_name="Large Network", model_size=ModelSize.large)

@@ -11,15 +11,21 @@ class LayerType(str, Enum):
     sigmoid = "sigmoid"
     softmax = "softmax"
 
+class ModelSize(str, Enum):
+    small = "small"
+    medium = "medium"
+    large = "large"
+
+
 class Layer(BaseModel):
     type: LayerType
     in_features: Optional[int] = None
     out_features: Optional[int] = None
 
 class TrainConfig(BaseModel):
-    epochs: int
+    epochs: int = Field(..., ge=1, le=500, description="Number of epochs (1-500)")
     dataset_name: str
-    model_size: Literal["small", "medium", "large"]
+    model_size: ModelSize
 
 class AdultIncomeInput(BaseModel):
     age: int = Field(..., ge=18, le=100)
@@ -63,7 +69,6 @@ class DatasetMetadata(BaseModel):
     description: str
     features: list[FeatureMetadata]
 
-
 class NetworkMetadata(BaseModel):
     display_name: str
-    model_size: Literal["small", "medium", "large"]
+    model_size: ModelSize
