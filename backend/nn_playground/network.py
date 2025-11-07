@@ -1,6 +1,8 @@
 
 import nano_nn as nn
-from backend.schemas import NetworkMetadata, TaskType, ModelSize
+
+from .schemas import NetworkMetadata, TaskType, ModelSize
+
 
 class SmallModel(nn.Module):
     def __init__(self, num_features: int, num_outputs: int, task_type: TaskType):

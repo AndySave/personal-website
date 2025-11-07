@@ -3,7 +3,8 @@ from numpy import ndarray
 from abc import ABC, abstractmethod
 from typing import Any
 from pydantic import BaseModel
-from backend.schemas import DatasetMetadata, TaskType
+
+from backend.nn_playground.schemas import DatasetMetadata, TaskType
 
 class BaseDataset(ABC):
     X: Any

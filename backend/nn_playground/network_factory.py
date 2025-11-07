@@ -1,6 +1,6 @@
 from .network import SmallModel, MediumModel, LargeModel
-from .datasets.base_dataset import BaseDataset
-from backend.schemas import TaskType, ModelSize
+from .datasets import BaseDataset
+from .schemas import TaskType, ModelSize
 
 class ModelFactory:
     def create(self, model_size: ModelSize, dataset: BaseDataset, task_type: TaskType):

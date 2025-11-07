@@ -1,6 +1,7 @@
 
 import nano_nn as nn
-from backend.nn.datasets.base_dataset import BaseDataset
+
+from .datasets import BaseDataset
 
 
 class InMemoryRepository:

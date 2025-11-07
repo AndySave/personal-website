@@ -5,11 +5,12 @@ from pydantic import BaseModel
 import numpy as np
 import nano_nn as nn
 
-from backend.main import app, get_repo, get_model_factory
-from backend.nn.datasets.base_dataset import BaseDataset
-from backend.nn.utils import normalize_activation
-from backend.repositories.in_memory_repo import InMemoryRepository
-from backend.schemas import TaskType, DatasetMetadata, NetworkMetadata, ModelSize
+from backend.main import app
+from backend.nn_playground.dependencies import get_repo, get_model_factory
+from backend.nn_playground.datasets import BaseDataset
+from backend.nn_playground.utils import normalize_activation
+from backend.nn_playground.in_memory_repo import InMemoryRepository
+from backend.nn_playground.schemas import TaskType, DatasetMetadata, NetworkMetadata, ModelSize
 
 
 class DummyNetwork(nn.Module):
@@ -266,3 +267,4 @@ def test_normalize_activation_expected():
     expected = np.array([0, 0.25, 0.5, 0.75, 1])
 
     assert all([out_v == exp_v for out_v, exp_v in zip(out, expected)])
+    

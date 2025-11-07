@@ -1,12 +1,13 @@
 
-from . import DATASETS_DIR
-from .base_dataset import BaseDataset
-from backend.loaders import BaseCsvLoader
-from backend.schemas import AdultIncomeInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
+
+from . import DATASETS_DIR, BaseDataset
+from backend.nn_playground.loaders import BaseCsvLoader
+from backend.nn_playground.schemas import AdultIncomeInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType
+
 
 
 CAT_COLS = ["workclass", "education", "marital_status", "race", "sex"]
