@@ -2,7 +2,7 @@
 import numpy as np
 import nano_nn as nn
 
-def normalize_activation(values):
+def normalize_activation(values: np.ndarray):
     min_val, max_val = np.min(values), np.max(values)
     if max_val == min_val:
         return np.zeros_like(values)

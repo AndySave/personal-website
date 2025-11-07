@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 import uuid
@@ -10,11 +10,12 @@ from pydantic import BaseModel
 from .nn.datasets.base_dataset import BaseDataset
 from .nn.datasets.adult_income_dataset import AdultIncomeDataset
 from .nn.datasets.medical_cost_dataset import MedicalCostDataset
+from .nn.network_factory import ModelFactory
 from .loaders import PandasCsvLoader
-from .schemas import TrainConfig, AdultIncomeInput, MedicalCostInput, DatasetMetadata, NetworkMetadata, ModelSize
+from .schemas import TrainConfig, AdultIncomeInput, MedicalCostInput, DatasetMetadata, NetworkMetadata
 from .nn.network import SmallModel, MediumModel, LargeModel
 from .nn.utils import get_activations
-
+from .repositories.in_memory_repo import InMemoryRepository
 
 
 app = FastAPI()
@@ -27,37 +28,35 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-models: dict[str, nn.Module] = {}
-datasets: dict[str, BaseDataset] = {
-    "adult_income": AdultIncomeDataset(csv_loader=PandasCsvLoader()),
-    "medical_cost": MedicalCostDataset(csv_loader=PandasCsvLoader()),
-}
+repo = InMemoryRepository()
+repo.add_dataset("adult_income", AdultIncomeDataset(csv_loader=PandasCsvLoader()))
+repo.add_dataset("medical_cost", MedicalCostDataset(csv_loader=PandasCsvLoader()))
+
+def get_repo():
+    return repo
+
+model_factory = ModelFactory()
+
+def get_model_factory():
+    return model_factory
 
 
 @app.post("/api/nn-framework/train")
-async def train_model(train_config: TrainConfig):
-    if train_config.dataset_name not in datasets:
+async def train_model(train_config: TrainConfig, repo: InMemoryRepository = Depends(get_repo), model_factory: ModelFactory = Depends(get_model_factory)):
+    if train_config.dataset_name not in repo.datasets:
         raise HTTPException(status_code=404, detail=f"Couldn't find dataset with name: {train_config.dataset_name}")
 
     model_id = str(uuid.uuid4())
-    dataset = datasets[train_config.dataset_name]
+    dataset = repo.get_dataset(train_config.dataset_name)
     task_type = dataset.task_type()
 
-    if train_config.model_size == "small":
-        model = SmallModel(dataset.num_features(),
-                           dataset.num_outputs(), task_type)
-    elif train_config.model_size == "medium":
-        model = MediumModel(dataset.num_features(),
-                            dataset.num_outputs(), task_type)
-    else:
-        model = LargeModel(dataset.num_features(),
-                           dataset.num_outputs(), task_type)
+    model = model_factory.create(train_config.model_size, dataset, task_type)
 
-    dataset = datasets[train_config.dataset_name]
+    dataset = repo.datasets[train_config.dataset_name]
 
     training_loss = []
     training_accuracy = []
-    for i in range(train_config.epochs):
+    for _ in range(train_config.epochs):
         model.train()
         output, loss = model.forward(dataset.X, dataset.y)
         training_loss.append(loss)
@@ -67,9 +66,7 @@ async def train_model(train_config: TrainConfig):
                 dataset.y, (output.squeeze() > 0.5)))
         model.backward()
 
-        print(f'epoch: {i+1}/{train_config.epochs}, loss: {loss:.6f}')
-
-    models[model_id] = model
+    repo.add_model(model_id, model)
 
     return {"model_id": model_id, "training_loss": training_loss, "training_accuracy": training_accuracy if len(training_accuracy) > 0 else None}
 
@@ -88,32 +85,32 @@ def predict(dataset: BaseDataset, model: nn.Module, input: BaseModel):
 
 
 @app.post("/api/nn-framework/predict/adult_income")
-async def predict_adult(model_id: str, input: AdultIncomeInput):
-    if model_id not in models:
+async def predict_adult(model_id: str, input: AdultIncomeInput, repo: InMemoryRepository = Depends(get_repo)):
+    if model_id not in repo.models:
         raise HTTPException(status_code=404, detail=f"Could not find model with model id: {model_id}")
 
-    model = models[model_id]
-    dataset = datasets["adult_income"]
+    model = repo.get_model(model_id)
+    dataset = repo.get_dataset("adult_income")
 
     return predict(dataset, model, input)
 
 
 @app.post("/api/nn-framework/predict/medical_cost")
-async def predict_medical(model_id: str, input: MedicalCostInput):
-    if model_id not in models:
+async def predict_medical(model_id: str, input: MedicalCostInput, repo: InMemoryRepository = Depends(get_repo)):
+    if model_id not in repo.models:
         raise HTTPException(status_code=404, detail=f"Could not find model with model id: {model_id}")
 
-    model = models[model_id]
-    dataset = datasets["medical_cost"]
+    model = repo.get_model(model_id)
+    dataset = repo.get_dataset("medical_cost")
 
     return predict(dataset, model, input)
 
 
 @app.get("/api/nn-framework/datasets-metadata", response_model=list[DatasetMetadata])
-async def datasets_metadata():
+async def datasets_metadata(repo: InMemoryRepository = Depends(get_repo)):
     metadatas = []
-    for dataset_name in datasets:
-        dataset = datasets[dataset_name]
+    for dataset_name in repo.datasets:
+        dataset = repo.get_dataset(dataset_name)
         metadatas.append(dataset.metadata())
     return metadatas
 
