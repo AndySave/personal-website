@@ -45,6 +45,15 @@ class MedicalCostInput(BaseModel):
     region: Literal["northwest", "northeast", "southwest", "southeast"]
 
 
+class TaskType(str, Enum):
+    regression = "regression"
+    binary_classification = "binary_classification"
+    multi_classification = "multi_classification"
+
+class FeatureType(str, Enum):
+    categorical = "categorical"
+    numeric = "numeric"
+
 class FeatureOption(BaseModel):
     value: str
     display_name: str
@@ -52,15 +61,10 @@ class FeatureOption(BaseModel):
 class FeatureMetadata(BaseModel):
     name: str
     display_name: str
-    type: str
+    type: FeatureType
     options: Optional[list[FeatureOption]] = None
     min: Optional[int] = None
     max: Optional[int] = None
-
-class TaskType(str, Enum):
-    regression = "regression"
-    binary_classification = "binary_classification"
-    multi_classification = "multi_classification"
 
 class DatasetMetadata(BaseModel):
     name: str

@@ -80,8 +80,8 @@ async def predict_medical(model_id: str, input: MedicalCostInput, repo: InMemory
 
     return predict(dataset, model, input)
 
-@router.get("/api/nn-framework/datasets-metadata", response_model=list[DatasetMetadata])
-async def datasets_metadata(repo: InMemoryRepository = Depends(get_repo)):
+@router.get("/api/nn-framework/datasets-metadata")
+async def datasets_metadata(repo: InMemoryRepository = Depends(get_repo)) -> list[DatasetMetadata]:
     metadatas = []
     for dataset_name in repo.datasets:
         dataset = repo.get_dataset(dataset_name)
@@ -89,8 +89,8 @@ async def datasets_metadata(repo: InMemoryRepository = Depends(get_repo)):
     return metadatas
 
 
-@router.get("/api/nn-framework/networks-metadata", response_model=list[NetworkMetadata])
-async def networks_metadata():
+@router.get("/api/nn-framework/networks-metadata")
+async def networks_metadata() -> list[NetworkMetadata]:
     metadatas = [SmallModel.metadata(), MediumModel.metadata(),
                  LargeModel.metadata()]
     return metadatas

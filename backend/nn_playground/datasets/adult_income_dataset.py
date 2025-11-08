@@ -6,7 +6,7 @@ from sklearn.compose import ColumnTransformer
 
 from . import DATASETS_DIR, BaseDataset
 from backend.nn_playground.loaders import BaseCsvLoader
-from backend.nn_playground.schemas import AdultIncomeInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType
+from backend.nn_playground.schemas import AdultIncomeInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType, FeatureType
 
 
 
@@ -98,7 +98,7 @@ class AdultIncomeDataset(BaseDataset):
                 FeatureMetadata(
                     name="workclass",
                     display_name="Work Class",
-                    type="categorical",
+                    type=FeatureType.categorical,
                     options=[
                         FeatureOption(value="Federal-gov", display_name="Federal government"),
                         FeatureOption(value="State-gov", display_name="State government"),
@@ -113,7 +113,7 @@ class AdultIncomeDataset(BaseDataset):
                 FeatureMetadata(
                     name="education",
                     display_name="Education Level",
-                    type="categorical",
+                    type=FeatureType.categorical,
                     options=[
                         FeatureOption(value="<HS", display_name="Below high school"),
                         FeatureOption(value="HS-grad", display_name="High school"),
@@ -126,7 +126,7 @@ class AdultIncomeDataset(BaseDataset):
                 FeatureMetadata(
                     name="marital_status",
                     display_name="Marital Status",
-                    type="categorical",
+                    type=FeatureType.categorical,
                     options=[
                         FeatureOption(value="Never-married", display_name="Never married"),
                         FeatureOption(value="Married-civ-spouse", display_name="Married (civilian spouse)"),
@@ -140,7 +140,7 @@ class AdultIncomeDataset(BaseDataset):
                 FeatureMetadata(
                     name="race",
                     display_name="Race",
-                    type="categorical",
+                    type=FeatureType.categorical,
                     options=[
                         FeatureOption(value="White", display_name="White"),
                         FeatureOption(value="Black", display_name="Black"),
@@ -152,7 +152,7 @@ class AdultIncomeDataset(BaseDataset):
                 FeatureMetadata(
                     name="sex",
                     display_name="Sex",
-                    type="categorical",
+                    type=FeatureType.categorical,
                     options=[
                         FeatureOption(value="Male", display_name="Male"),
                         FeatureOption(value="Female", display_name="Female"),
@@ -161,14 +161,14 @@ class AdultIncomeDataset(BaseDataset):
                 FeatureMetadata(
                     name="age",
                     display_name="Age",
-                    type="numeric",
+                    type=FeatureType.numeric,
                     min=18,
                     max=100,
                 ),
                 FeatureMetadata(
                     name="work_hours",
                     display_name="Weekly Work Hours",
-                    type="numeric",
+                    type=FeatureType.numeric,
                     min=0,
                     max=200,
                 ),

@@ -7,7 +7,7 @@ from sklearn.compose import ColumnTransformer
 
 from . import DATASETS_DIR, BaseDataset
 from backend.nn_playground.loaders import BaseCsvLoader
-from backend.nn_playground.schemas import MedicalCostInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType
+from backend.nn_playground.schemas import MedicalCostInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType, FeatureType
 
 
 
@@ -63,7 +63,7 @@ class MedicalCostDataset(BaseDataset):
                 FeatureMetadata(
                     name="sex",
                     display_name="Sex",
-                    type="categorical",
+                    type=FeatureType.categorical,
                     options=[
                         FeatureOption(value="male", display_name="Male"),
                         FeatureOption(value="female", display_name="Female"),
@@ -72,7 +72,7 @@ class MedicalCostDataset(BaseDataset):
                 FeatureMetadata(
                     name="smoker",
                     display_name="Smoker",
-                    type="categorical",
+                    type=FeatureType.categorical,
                     options=[
                         FeatureOption(value="yes", display_name="Yes"),
                         FeatureOption(value="no", display_name="No"),
@@ -81,7 +81,7 @@ class MedicalCostDataset(BaseDataset):
                 FeatureMetadata(
                     name="region",
                     display_name="Region",
-                    type="categorical",
+                    type=FeatureType.categorical,
                     options=[
                         FeatureOption(value="northeast", display_name="Northeast"),
                         FeatureOption(value="northwest", display_name="Northwest"),
@@ -92,21 +92,21 @@ class MedicalCostDataset(BaseDataset):
                 FeatureMetadata(
                     name="age",
                     display_name="Age",
-                    type="numeric",
+                    type=FeatureType.numeric,
                     min=18,
                     max=100,
                 ),
                 FeatureMetadata(
                     name="bmi",
                     display_name="Body Mass Index",
-                    type="numeric",
+                    type=FeatureType.numeric,
                     min=10,
                     max=50,
                 ),
                 FeatureMetadata(
                     name="children",
                     display_name="Number of Children",
-                    type="numeric",
+                    type=FeatureType.numeric,
                     min=0,
                     max=10,
                 ),
