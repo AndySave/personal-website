@@ -6,8 +6,8 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 
 from . import DATASETS_DIR, BaseDataset
-from backend.nn_playground.loaders import BaseCsvLoader
-from backend.nn_playground.schemas import MedicalCostInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType, FeatureType
+from backend.nn_api.loaders import BaseCsvLoader
+from backend.nn_api.schemas import MedicalCostInput, FeatureOption, FeatureMetadata, DatasetMetadata, TaskType, FeatureType
 
 
 

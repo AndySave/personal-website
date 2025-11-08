@@ -2,11 +2,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .nn_playground.router import router as nn_router
+from .nn_api.router import router as nn_router
+from .chess_api.router import router as chess_router
 
 
 app = FastAPI()
 app.include_router(nn_router)
+app.include_router(chess_router)
 
 app.add_middleware(
     CORSMiddleware,

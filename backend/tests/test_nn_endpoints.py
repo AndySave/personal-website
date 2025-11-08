@@ -6,11 +6,11 @@ import numpy as np
 import nano_nn as nn
 
 from backend.main import app
-from backend.nn_playground.dependencies import get_repo, get_model_factory
-from backend.nn_playground.datasets import BaseDataset
-from backend.nn_playground.utils import normalize_activation
-from backend.nn_playground.in_memory_repo import InMemoryRepository
-from backend.nn_playground.schemas import TaskType, DatasetMetadata, NetworkMetadata, ModelSize
+from backend.nn_api.dependencies import get_repo, get_model_factory
+from backend.nn_api.datasets import BaseDataset
+from backend.nn_api.utils import normalize_activation
+from backend.nn_api.in_memory_repo import InMemoryRepository
+from backend.nn_api.schemas import TaskType, DatasetMetadata, NetworkMetadata, ModelSize
 
 
 class DummyNetwork(nn.Module):
